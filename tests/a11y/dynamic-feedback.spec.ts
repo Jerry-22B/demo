@@ -167,7 +167,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarBatchWithdrawModal)',
       return dlg.querySelectorAll('[aria-live]').length;
     });
 
-    expect(liveRegions, 'Modal should contain aria-live regions for status updates').toBeGreaterThan(0);
+    expect(
+      liveRegions,
+      'Modal should contain aria-live regions for status updates',
+    ).toBeGreaterThan(0);
   });
 
   test('status regions have role="status" or role="alert"', async ({ page }) => {
@@ -182,7 +185,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarBatchWithdrawModal)',
       return dlg.querySelectorAll('[role="status"], [role="alert"]').length;
     });
 
-    expect(statusRoles, 'Modal should contain role="status" or role="alert" for announcements').toBeGreaterThan(0);
+    expect(
+      statusRoles,
+      'Modal should contain role="status" or role="alert" for announcements',
+    ).toBeGreaterThan(0);
   });
 });
 
@@ -198,7 +204,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarSendView)', () => {
       return document.querySelectorAll('[aria-live="polite"]').length;
     });
 
-    expect(liveRegions, 'Send page should contain aria-live regions for error announcements').toBeGreaterThan(0);
+    expect(
+      liveRegions,
+      'Send page should contain aria-live regions for error announcements',
+    ).toBeGreaterThan(0);
   });
 });
 
@@ -214,7 +223,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarVaultDeposit)', () =>
       return document.querySelectorAll('[aria-live="polite"]').length;
     });
 
-    expect(liveRegions, 'Vault deposit page should contain aria-live regions for validation errors').toBeGreaterThan(0);
+    expect(
+      liveRegions,
+      'Vault deposit page should contain aria-live regions for validation errors',
+    ).toBeGreaterThan(0);
   });
 });
 
@@ -230,7 +242,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarSplit)', () => {
       return document.querySelectorAll('[aria-live="polite"]').length;
     });
 
-    expect(liveRegions, 'StellarSplit page should contain aria-live regions for status indicators').toBeGreaterThan(0);
+    expect(
+      liveRegions,
+      'StellarSplit page should contain aria-live regions for status indicators',
+    ).toBeGreaterThan(0);
   });
 });
 
@@ -281,7 +296,9 @@ test.describe('Accessibility — Keyboard Navigation (Form Submission)', () => {
     }
 
     // Fill in valid data
-    await recipientInput.fill('st:xlm:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+    await recipientInput.fill(
+      'st:xlm:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    );
     await page.locator('#stellar-amount').fill('1.5');
 
     // Press Enter to submit
