@@ -51,6 +51,13 @@ test.describe('Accessibility — Focus Trap & Return (QRCodeModal)', () => {
   test('focus returns to trigger after modal close', async ({ page }) => {
     await gotoStory(page, 'a11y-qrcodemodal--open');
     const dialog = page.getByRole('dialog');
+    const triggerButton = page.getByRole('button', { name: /show qr/i });
+
+    // Focus the trigger button before opening modal
+    await triggerButton.focus();
+    await expect(triggerButton).toBeFocused();
+
+    // Open the modal (simulated in story)
     await expect(dialog).toBeVisible();
 
     // Click inside dialog to set focus
@@ -59,9 +66,8 @@ test.describe('Accessibility — Focus Trap & Return (QRCodeModal)', () => {
     // Close the dialog
     await page.getByRole('button', { name: 'Close modal' }).click();
 
-    // Verify focus returns to a focusable element (in this case, since it's a story,
-    // we verify the dialog is no longer visible and focus can be set)
-    await expect(dialog).not.toBeVisible();
+    // Strictly assert focus returns to trigger button
+    await expect(triggerButton).toBeFocused();
   });
 
   test('focus stays trapped during multiple Tab cycles', async ({ page }) => {
@@ -73,11 +79,8 @@ test.describe('Accessibility — Focus Trap & Return (QRCodeModal)', () => {
     // Press Tab multiple times to ensure focus stays trapped
     for (let i = 0; i < 30; i++) {
       await page.keyboard.press('Tab');
-      const escaped = await page.evaluate(() => {
-        const dlg = document.querySelector('[role="dialog"]');
-        return dlg ? !dlg.contains(document.activeElement) : true;
-      });
-      expect(escaped, `Focus escaped QRCodeModal on Tab press ${i + 1}`).toBe(false);
+      const isInside = await dialog.evaluate((node) => node.contains(document.activeElement));
+      expect(isInside, `Focus escaped QRCodeModal on Tab press ${i + 1}`).toBe(true);
     }
   });
 });
@@ -86,6 +89,13 @@ test.describe('Accessibility — Focus Trap & Return (StellarBatchWithdrawModal)
   test('focus returns to trigger after modal close', async ({ page }) => {
     await gotoStory(page, 'a11y-stellarbatchwithdrawmodal--open');
     const dialog = page.getByRole('dialog', { name: /batch withdrawal preview/i });
+    const triggerButton = page.getByRole('button', { name: /withdraw/i });
+
+    // Focus the trigger button before opening modal
+    await triggerButton.focus();
+    await expect(triggerButton).toBeFocused();
+
+    // Open the modal (simulated in story)
     await expect(dialog).toBeVisible();
 
     // Click inside dialog to set focus
@@ -94,8 +104,8 @@ test.describe('Accessibility — Focus Trap & Return (StellarBatchWithdrawModal)
     // Close the dialog
     await page.getByRole('button', { name: 'Close modal' }).click();
 
-    // Verify the dialog is no longer visible
-    await expect(dialog).not.toBeVisible();
+    // Strictly assert focus returns to trigger button
+    await expect(triggerButton).toBeFocused();
   });
 
   test('focus stays trapped during multiple Tab cycles', async ({ page }) => {
@@ -107,11 +117,8 @@ test.describe('Accessibility — Focus Trap & Return (StellarBatchWithdrawModal)
     // Press Tab multiple times to ensure focus stays trapped
     for (let i = 0; i < 30; i++) {
       await page.keyboard.press('Tab');
-      const escaped = await page.evaluate(() => {
-        const dlg = document.querySelector('[aria-labelledby="batch-withdraw-heading"]');
-        return dlg ? !dlg.contains(document.activeElement) : true;
-      });
-      expect(escaped, `Focus escaped batch dialog on Tab press ${i + 1}`).toBe(false);
+      const isInside = await dialog.evaluate((node) => node.contains(document.activeElement));
+      expect(isInside, `Focus escaped batch dialog on Tab press ${i + 1}`).toBe(true);
     }
   });
 });
@@ -120,6 +127,13 @@ test.describe('Accessibility — Focus Trap & Return (QRScannerDialog)', () => {
   test('focus returns to trigger after modal close', async ({ page }) => {
     await gotoStory(page, 'a11y-qrscannerdialog--open');
     const dialog = page.getByRole('dialog', { name: /scan recipient qr/i });
+    const triggerButton = page.getByRole('button', { name: /scan qr/i });
+
+    // Focus the trigger button before opening modal
+    await triggerButton.focus();
+    await expect(triggerButton).toBeFocused();
+
+    // Open the modal (simulated in story)
     await expect(dialog).toBeVisible();
 
     // Click inside dialog to set focus
@@ -128,8 +142,8 @@ test.describe('Accessibility — Focus Trap & Return (QRScannerDialog)', () => {
     // Close the dialog
     await page.getByRole('button', { name: /close qr scanner/i }).click();
 
-    // Verify the dialog is no longer visible
-    await expect(dialog).not.toBeVisible();
+    // Strictly assert focus returns to trigger button
+    await expect(triggerButton).toBeFocused();
   });
 
   test('focus stays trapped during multiple Tab cycles', async ({ page }) => {
@@ -141,11 +155,8 @@ test.describe('Accessibility — Focus Trap & Return (QRScannerDialog)', () => {
     // Press Tab multiple times to ensure focus stays trapped
     for (let i = 0; i < 25; i++) {
       await page.keyboard.press('Tab');
-      const escaped = await page.evaluate(() => {
-        const dlg = document.querySelector('[aria-labelledby="qr-scanner-title"]');
-        return dlg ? !dlg.contains(document.activeElement) : true;
-      });
-      expect(escaped, `Focus escaped QR scanner on Tab press ${i + 1}`).toBe(false);
+      const isInside = await dialog.evaluate((node) => node.contains(document.activeElement));
+      expect(isInside, `Focus escaped QR scanner on Tab press ${i + 1}`).toBe(true);
     }
   });
 });
@@ -199,7 +210,15 @@ test.describe('Accessibility — ARIA Live Regions (StellarSendView)', () => {
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1500);
 
-    // Check for aria-live regions for error messages
+    // Strictly assert the form is visible
+    const recipientInput = page.locator('#stellar-recipient');
+    await expect(recipientInput).toBeVisible();
+
+    // Trigger an error by submitting invalid data
+    await recipientInput.fill('invalid-meta-address');
+    await page.locator('#stellar-amount').fill('1.5');
+
+    // Assert aria-live regions exist for error announcements
     const liveRegions = await page.evaluate(() => {
       return document.querySelectorAll('[aria-live="polite"]').length;
     });
@@ -208,6 +227,64 @@ test.describe('Accessibility — ARIA Live Regions (StellarSendView)', () => {
       liveRegions,
       'Send page should contain aria-live regions for error announcements',
     ).toBeGreaterThan(0);
+
+    // Assert error state text is announced
+    const errorRegion = page.locator('[aria-live="polite"]');
+    await expect(errorRegion).toBeVisible();
+    await expect(errorRegion).toContainText(/error|invalid|failed/i);
+  });
+
+  test('pending state announces via aria-live', async ({ page }) => {
+    await mockConnectedWallet(page);
+    await page.goto('/stellar/send');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1500);
+
+    // Strictly assert the form is visible
+    const recipientInput = page.locator('#stellar-recipient');
+    await expect(recipientInput).toBeVisible();
+
+    // Fill in valid data
+    await recipientInput.fill(
+      'st:xlm:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    );
+    await page.locator('#stellar-amount').fill('1.5');
+
+    // Submit to trigger pending state
+    const submitButton = page.getByRole('button', { name: /send/i });
+    await submitButton.click();
+
+    // Assert pending state text is announced
+    const statusRegion = page.locator('[aria-live="polite"]');
+    await expect(statusRegion).toBeVisible();
+    await expect(statusRegion).toContainText(/submitting|pending|processing/i);
+  });
+
+  test('success state announces via aria-live', async ({ page }) => {
+    await mockConnectedWallet(page);
+    await page.goto('/stellar/send');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1500);
+
+    // Strictly assert the form is visible
+    const recipientInput = page.locator('#stellar-recipient');
+    await expect(recipientInput).toBeVisible();
+
+    // Fill in valid data
+    await recipientInput.fill(
+      'st:xlm:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    );
+    await page.locator('#stellar-amount').fill('1.5');
+
+    // Submit and wait for success state
+    const submitButton = page.getByRole('button', { name: /send/i });
+    await submitButton.click();
+    await page.waitForTimeout(2000);
+
+    // Assert success state text is announced
+    const statusRegion = page.locator('[aria-live="polite"]');
+    await expect(statusRegion).toBeVisible();
+    await expect(statusRegion).toContainText(/success|completed|confirmed/i);
   });
 });
 
@@ -218,7 +295,15 @@ test.describe('Accessibility — ARIA Live Regions (StellarVaultDeposit)', () =>
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1500);
 
-    // Check for aria-live regions for form validation
+    // Strictly assert the form is visible
+    const form = page.locator('form');
+    await expect(form).toBeVisible();
+
+    // Trigger a validation error by submitting empty form
+    const submitButton = page.getByRole('button', { name: /deposit/i });
+    await submitButton.click();
+
+    // Assert aria-live regions exist for validation errors
     const liveRegions = await page.evaluate(() => {
       return document.querySelectorAll('[aria-live="polite"]').length;
     });
@@ -227,6 +312,56 @@ test.describe('Accessibility — ARIA Live Regions (StellarVaultDeposit)', () =>
       liveRegions,
       'Vault deposit page should contain aria-live regions for validation errors',
     ).toBeGreaterThan(0);
+
+    // Assert error state text is announced
+    const errorRegion = page.locator('[aria-live="polite"]');
+    await expect(errorRegion).toBeVisible();
+    await expect(errorRegion).toContainText(/error|invalid|required/i);
+  });
+
+  test('pending state announces via aria-live', async ({ page }) => {
+    await mockConnectedWallet(page);
+    await page.goto('/stellar/vault/deposit');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1500);
+
+    // Strictly assert the form is visible
+    const form = page.locator('form');
+    await expect(form).toBeVisible();
+
+    // Fill in valid data and submit
+    const amountInput = page.locator('#vault-amount');
+    await amountInput.fill('1.5');
+    const submitButton = page.getByRole('button', { name: /deposit/i });
+    await submitButton.click();
+
+    // Assert pending state text is announced
+    const statusRegion = page.locator('[aria-live="polite"]');
+    await expect(statusRegion).toBeVisible();
+    await expect(statusRegion).toContainText(/submitting|pending|processing/i);
+  });
+
+  test('success state announces via aria-live', async ({ page }) => {
+    await mockConnectedWallet(page);
+    await page.goto('/stellar/vault/deposit');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1500);
+
+    // Strictly assert the form is visible
+    const form = page.locator('form');
+    await expect(form).toBeVisible();
+
+    // Fill in valid data and submit
+    const amountInput = page.locator('#vault-amount');
+    await amountInput.fill('1.5');
+    const submitButton = page.getByRole('button', { name: /deposit/i });
+    await submitButton.click();
+    await page.waitForTimeout(2000);
+
+    // Assert success state text is announced
+    const statusRegion = page.locator('[aria-live="polite"]');
+    await expect(statusRegion).toBeVisible();
+    await expect(statusRegion).toContainText(/success|completed|confirmed/i);
   });
 });
 
@@ -237,7 +372,11 @@ test.describe('Accessibility — ARIA Live Regions (StellarSplit)', () => {
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1500);
 
-    // Check for aria-live regions for batch status
+    // Strictly assert the form is visible
+    const form = page.locator('form');
+    await expect(form).toBeVisible();
+
+    // Assert aria-live regions exist for status indicators
     const liveRegions = await page.evaluate(() => {
       return document.querySelectorAll('[aria-live="polite"]').length;
     });
@@ -246,6 +385,77 @@ test.describe('Accessibility — ARIA Live Regions (StellarSplit)', () => {
       liveRegions,
       'StellarSplit page should contain aria-live regions for status indicators',
     ).toBeGreaterThan(0);
+
+    // Assert status region is visible
+    const statusRegion = page.locator('[aria-live="polite"]');
+    await expect(statusRegion).toBeVisible();
+  });
+
+  test('pending state announces via aria-live', async ({ page }) => {
+    await mockConnectedWallet(page);
+    await page.goto('/stellar/split');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1500);
+
+    // Strictly assert the form is visible
+    const form = page.locator('form');
+    await expect(form).toBeVisible();
+
+    // Fill in valid data and submit
+    const amountInput = page.locator('#split-amount');
+    await amountInput.fill('1.5');
+    const submitButton = page.getByRole('button', { name: /split/i });
+    await submitButton.click();
+
+    // Assert pending state text is announced
+    const statusRegion = page.locator('[aria-live="polite"]');
+    await expect(statusRegion).toBeVisible();
+    await expect(statusRegion).toContainText(/submitting|pending|processing/i);
+  });
+
+  test('success state announces via aria-live', async ({ page }) => {
+    await mockConnectedWallet(page);
+    await page.goto('/stellar/split');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1500);
+
+    // Strictly assert the form is visible
+    const form = page.locator('form');
+    await expect(form).toBeVisible();
+
+    // Fill in valid data and submit
+    const amountInput = page.locator('#split-amount');
+    await amountInput.fill('1.5');
+    const submitButton = page.getByRole('button', { name: /split/i });
+    await submitButton.click();
+    await page.waitForTimeout(2000);
+
+    // Assert success state text is announced
+    const statusRegion = page.locator('[aria-live="polite"]');
+    await expect(statusRegion).toBeVisible();
+    await expect(statusRegion).toContainText(/success|completed|confirmed/i);
+  });
+
+  test('error state announces via aria-live', async ({ page }) => {
+    await mockConnectedWallet(page);
+    await page.goto('/stellar/split');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1500);
+
+    // Strictly assert the form is visible
+    const form = page.locator('form');
+    await expect(form).toBeVisible();
+
+    // Trigger an error by submitting invalid data
+    const amountInput = page.locator('#split-amount');
+    await amountInput.fill('-1');
+    const submitButton = page.getByRole('button', { name: /split/i });
+    await submitButton.click();
+
+    // Assert error state text is announced
+    const alertRegion = page.locator('[aria-live="assertive"], [role="alert"]');
+    await expect(alertRegion).toBeVisible();
+    await expect(alertRegion).toContainText(/error|invalid|failed/i);
   });
 });
 
@@ -262,8 +472,8 @@ test.describe('Accessibility — Keyboard Navigation (Modal Dismissal)', () => {
     // Press Escape to close
     await page.keyboard.press('Escape');
 
-    // Verify the dialog is no longer visible (the story shows the modal state after escape)
-    await page.waitForTimeout(200);
+    // Explicitly assert the dialog is hidden after Escape
+    await expect(dialog).toBeHidden();
   });
 
   test('Escape key closes StellarBatchWithdrawModal', async ({ page }) => {
@@ -274,8 +484,8 @@ test.describe('Accessibility — Keyboard Navigation (Modal Dismissal)', () => {
     // Press Escape to close
     await page.keyboard.press('Escape');
 
-    // Verify the dialog is no longer visible (the story shows the modal state after escape)
-    await page.waitForTimeout(200);
+    // Explicitly assert the dialog is hidden after Escape
+    await expect(dialog).toBeHidden();
   });
 });
 
@@ -286,14 +496,9 @@ test.describe('Accessibility — Keyboard Navigation (Form Submission)', () => {
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1500);
 
-    // Check if the form is visible
+    // Strictly assert the form is visible
     const recipientInput = page.locator('#stellar-recipient');
-    const hasForm = await recipientInput.isVisible({ timeout: 5000 }).catch(() => false);
-
-    if (!hasForm) {
-      // Wallet context not connected in this env — skip this test
-      return;
-    }
+    await expect(recipientInput).toBeVisible();
 
     // Fill in valid data
     await recipientInput.fill(
@@ -314,14 +519,9 @@ test.describe('Accessibility — Keyboard Navigation (Form Submission)', () => {
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1500);
 
-    // Check if the form is visible
+    // Strictly assert the form is visible
     const recipientInput = page.locator('#stellar-recipient');
-    const hasForm = await recipientInput.isVisible({ timeout: 5000 }).catch(() => false);
-
-    if (!hasForm) {
-      // Wallet context not connected in this env — skip this test
-      return;
-    }
+    await expect(recipientInput).toBeVisible();
 
     // Tab through form elements
     await page.keyboard.press('Tab');
@@ -343,8 +543,8 @@ test.describe('Accessibility — Keyboard Navigation (QRScannerDialog)', () => {
     // Press Escape to close
     await page.keyboard.press('Escape');
 
-    // Verify the dialog is still present (the fixture doesn't wire Escape → onClose)
-    await expect(dialog).toBeVisible();
+    // Explicitly assert the dialog is hidden after Escape
+    await expect(dialog).toBeHidden();
   });
 
   test('Space/Enter activates buttons in scanner dialog', async ({ page }) => {
