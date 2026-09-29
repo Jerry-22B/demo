@@ -23,8 +23,10 @@ export const Default: Story = {};
  */
 export const Interactive: Story = {
   render: () => {
-    const [depositState, setDepositState] = useState<'idle' | 'pending' | 'success' | 'error'>('idle')
-    const [error, setError] = useState('')
+    const [depositState, setDepositState] = useState<'idle' | 'pending' | 'success' | 'error'>(
+      'idle',
+    );
+    const [error, setError] = useState('');
 
     // Mock the component with controlled state for testing
     return (
@@ -38,28 +40,40 @@ export const Interactive: Story = {
           <div className="mb-6 flex gap-2 border border-outline-variant bg-surface-container p-4">
             <button
               type="button"
-              onClick={() => { setDepositState('idle'); setError('') }}
+              onClick={() => {
+                setDepositState('idle');
+                setError('');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Idle
             </button>
             <button
               type="button"
-              onClick={() => { setDepositState('pending'); setError('') }}
+              onClick={() => {
+                setDepositState('pending');
+                setError('');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Pending
             </button>
             <button
               type="button"
-              onClick={() => { setDepositState('success'); setError('') }}
+              onClick={() => {
+                setDepositState('success');
+                setError('');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Success
             </button>
             <button
               type="button"
-              onClick={() => { setDepositState('error'); setError('Deposit failed: insufficient balance') }}
+              onClick={() => {
+                setDepositState('error');
+                setError('Deposit failed: insufficient balance');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Error
@@ -69,7 +83,10 @@ export const Interactive: Story = {
           {/* Simulated form with aria-live regions */}
           <form className="space-y-4">
             <div>
-              <label htmlFor="vault-recipient" className="mb-2 block font-heading text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant">
+              <label
+                htmlFor="vault-recipient"
+                className="mb-2 block font-heading text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant"
+              >
                 Recipient Meta-Address
               </label>
               <input
@@ -78,13 +95,20 @@ export const Interactive: Story = {
                 defaultValue="st:xlm:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                 className="h-12 w-full border border-outline-variant bg-surface px-4 font-mono text-sm text-primary placeholder:text-outline focus:border-primary"
               />
-              <p id="vault-recipient-error" className="min-h-5 text-xs text-error" aria-live="polite">
+              <p
+                id="vault-recipient-error"
+                className="min-h-5 text-xs text-error"
+                aria-live="polite"
+              >
                 {depositState === 'error' && error ? error : ' '}
               </p>
             </div>
 
             <div>
-              <label htmlFor="vault-amount" className="mb-2 block font-heading text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant">
+              <label
+                htmlFor="vault-amount"
+                className="mb-2 block font-heading text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant"
+              >
                 Amount (XLM)
               </label>
               <input
@@ -110,19 +134,11 @@ export const Interactive: Story = {
                 </p>
               )}
               {depositState === 'success' && (
-                <p className="font-body text-sm text-tertiary">
-                  Deposit completed successfully
-                </p>
+                <p className="font-body text-sm text-tertiary">Deposit completed successfully</p>
               )}
-              {depositState === 'error' && (
-                <p className="font-body text-sm text-error">
-                  {error}
-                </p>
-              )}
+              {depositState === 'error' && <p className="font-body text-sm text-error">{error}</p>}
               {depositState === 'idle' && (
-                <p className="font-body text-sm text-outline">
-                  Enter deposit details to begin
-                </p>
+                <p className="font-body text-sm text-outline">Enter deposit details to begin</p>
               )}
             </div>
 
@@ -136,6 +152,6 @@ export const Interactive: Story = {
           </form>
         </div>
       </div>
-    )
+    );
   },
-}
+};

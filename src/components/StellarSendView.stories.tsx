@@ -133,8 +133,10 @@ export const Success: Story = {
  */
 export const Interactive: Story = {
   render: () => {
-    const [submitState, setSubmitState] = useState<'idle' | 'pending' | 'success' | 'error'>('idle')
-    const [error, setError] = useState('')
+    const [submitState, setSubmitState] = useState<'idle' | 'pending' | 'success' | 'error'>(
+      'idle',
+    );
+    const [error, setError] = useState('');
 
     return (
       <div className="min-h-screen bg-surface p-8">
@@ -147,28 +149,40 @@ export const Interactive: Story = {
           <div className="mb-6 flex gap-2 border border-outline-variant bg-surface-container p-4">
             <button
               type="button"
-              onClick={() => { setSubmitState('idle'); setError('') }}
+              onClick={() => {
+                setSubmitState('idle');
+                setError('');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Idle
             </button>
             <button
               type="button"
-              onClick={() => { setSubmitState('pending'); setError('') }}
+              onClick={() => {
+                setSubmitState('pending');
+                setError('');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Pending
             </button>
             <button
               type="button"
-              onClick={() => { setSubmitState('success'); setError('') }}
+              onClick={() => {
+                setSubmitState('success');
+                setError('');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Success
             </button>
             <button
               type="button"
-              onClick={() => { setSubmitState('error'); setError('Transaction failed: insufficient balance') }}
+              onClick={() => {
+                setSubmitState('error');
+                setError('Transaction failed: insufficient balance');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Error
@@ -178,7 +192,10 @@ export const Interactive: Story = {
           {/* Simulated form with aria-live regions */}
           <form className="space-y-4">
             <div>
-              <label htmlFor="stellar-recipient" className="mb-2 block font-heading text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant">
+              <label
+                htmlFor="stellar-recipient"
+                className="mb-2 block font-heading text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant"
+              >
                 Recipient Meta-Address
               </label>
               <input
@@ -197,7 +214,10 @@ export const Interactive: Story = {
             </div>
 
             <div>
-              <label htmlFor="stellar-amount" className="mb-2 block font-heading text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant">
+              <label
+                htmlFor="stellar-amount"
+                className="mb-2 block font-heading text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant"
+              >
                 Amount (XLM)
               </label>
               <div className="relative">
@@ -211,7 +231,11 @@ export const Interactive: Story = {
                   XLM
                 </span>
               </div>
-              <p id="stellar-amount-error" className="min-h-5 text-xs text-error" aria-live="polite">
+              <p
+                id="stellar-amount-error"
+                className="min-h-5 text-xs text-error"
+                aria-live="polite"
+              >
                 {submitState === 'error' && error ? error : ' '}
               </p>
             </div>
@@ -246,15 +270,9 @@ export const Interactive: Story = {
                   Transaction completed successfully
                 </p>
               )}
-              {submitState === 'error' && (
-                <p className="font-body text-sm text-error">
-                  {error}
-                </p>
-              )}
+              {submitState === 'error' && <p className="font-body text-sm text-error">{error}</p>}
               {submitState === 'idle' && (
-                <p className="font-body text-sm text-outline">
-                  Enter recipient and amount to send
-                </p>
+                <p className="font-body text-sm text-outline">Enter recipient and amount to send</p>
               )}
             </div>
 
@@ -268,6 +286,6 @@ export const Interactive: Story = {
           </form>
         </div>
       </div>
-    )
+    );
   },
-}
+};

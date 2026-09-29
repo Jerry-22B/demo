@@ -58,8 +58,8 @@ export const CloseButton: Story = {
  */
 export const Interactive: Story = {
   render: (args) => {
-    const [open, setOpen] = useState(false)
-    const triggerRef = useRef<HTMLButtonElement>(null)
+    const [open, setOpen] = useState(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
     return (
       <div className="flex h-screen items-center justify-center bg-surface">
@@ -71,13 +71,8 @@ export const Interactive: Story = {
         >
           Show QR
         </button>
-        {open && (
-          <QRCodeModal
-            {...args}
-            onClose={() => setOpen(false)}
-          />
-        )}
+        {open && <QRCodeModal {...args} onClose={() => setOpen(false)} />}
       </div>
-    )
+    );
   },
-}
+};

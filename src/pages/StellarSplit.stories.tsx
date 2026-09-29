@@ -5,7 +5,11 @@ import { withStellarWallet } from '../../.storybook/decorators/withStellarWallet
 import { SAMPLE_STEALTH_ADDRESS } from '../../.storybook/fixtures';
 
 // Simulated status badge component for testing
-function StatusBadge({ status }: { status: 'valid' | 'invalid' | 'pending' | 'success' | 'failed' | 'unvalidated' }) {
+function StatusBadge({
+  status,
+}: {
+  status: 'valid' | 'invalid' | 'pending' | 'success' | 'failed' | 'unvalidated';
+}) {
   switch (status) {
     case 'valid':
       return (
@@ -88,8 +92,10 @@ export const Default: Story = {};
  */
 export const Interactive: Story = {
   render: () => {
-    const [status, setStatus] = useState<'valid' | 'invalid' | 'pending' | 'success' | 'failed' | 'unvalidated'>('unvalidated')
-    const [error, setError] = useState('')
+    const [status, setStatus] = useState<
+      'valid' | 'invalid' | 'pending' | 'success' | 'failed' | 'unvalidated'
+    >('unvalidated');
+    const [error, setError] = useState('');
 
     return (
       <div className="min-h-screen bg-surface p-8">
@@ -102,42 +108,60 @@ export const Interactive: Story = {
           <div className="mb-6 flex gap-2 border border-outline-variant bg-surface-container p-4">
             <button
               type="button"
-              onClick={() => { setStatus('unvalidated'); setError('') }}
+              onClick={() => {
+                setStatus('unvalidated');
+                setError('');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Unvalidated
             </button>
             <button
               type="button"
-              onClick={() => { setStatus('valid'); setError('') }}
+              onClick={() => {
+                setStatus('valid');
+                setError('');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Valid
             </button>
             <button
               type="button"
-              onClick={() => { setStatus('invalid'); setError('Invalid meta-address format') }}
+              onClick={() => {
+                setStatus('invalid');
+                setError('Invalid meta-address format');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Invalid
             </button>
             <button
               type="button"
-              onClick={() => { setStatus('pending'); setError('') }}
+              onClick={() => {
+                setStatus('pending');
+                setError('');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Pending
             </button>
             <button
               type="button"
-              onClick={() => { setStatus('success'); setError('') }}
+              onClick={() => {
+                setStatus('success');
+                setError('');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Success
             </button>
             <button
               type="button"
-              onClick={() => { setStatus('failed'); setError('Transaction failed: insufficient balance') }}
+              onClick={() => {
+                setStatus('failed');
+                setError('Transaction failed: insufficient balance');
+              }}
               className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
             >
               Failed
@@ -152,15 +176,11 @@ export const Interactive: Story = {
                   <p className="font-mono text-sm text-primary">
                     st:xlm:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
                   </p>
-                  <p className="font-mono text-sm text-on-surface-variant">
-                    5.5 XLM
-                  </p>
+                  <p className="font-mono text-sm text-on-surface-variant">5.5 XLM</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusBadge status={status} />
-                  <span className="font-body text-xs text-outline">
-                    {status}
-                  </span>
+                  <span className="font-body text-xs text-outline">{status}</span>
                 </div>
               </div>
             </div>
@@ -172,9 +192,7 @@ export const Interactive: Story = {
                 aria-live="assertive"
                 className="border border-error/30 bg-error/10 p-4"
               >
-                <p className="font-body text-sm text-error">
-                  {error}
-                </p>
+                <p className="font-body text-sm text-error">{error}</p>
               </div>
             ) : null}
 
@@ -198,14 +216,12 @@ export const Interactive: Story = {
                 aria-live="polite"
                 className="border border-tertiary/30 bg-tertiary/10 p-4"
               >
-                <p className="font-body text-sm text-tertiary">
-                  Batch completed successfully
-                </p>
+                <p className="font-body text-sm text-tertiary">Batch completed successfully</p>
               </div>
             ) : null}
           </div>
         </div>
       </div>
-    )
+    );
   },
-}
+};

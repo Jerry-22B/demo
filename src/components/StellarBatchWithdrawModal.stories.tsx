@@ -90,8 +90,8 @@ export const Closed: Story = {
  */
 export const Interactive: Story = {
   render: (args) => {
-    const [open, setOpen] = useState(false)
-    const triggerRef = useRef<HTMLButtonElement>(null)
+    const [open, setOpen] = useState(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
     return (
       <div className="flex h-screen items-center justify-center bg-surface">
@@ -104,13 +104,9 @@ export const Interactive: Story = {
           Open Batch Withdraw
         </button>
         {open && (
-          <StellarBatchWithdrawModal
-            {...args}
-            isOpen={true}
-            onClose={() => setOpen(false)}
-          />
+          <StellarBatchWithdrawModal {...args} isOpen={true} onClose={() => setOpen(false)} />
         )}
       </div>
-    )
+    );
   },
-}
+};
