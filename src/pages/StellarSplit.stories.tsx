@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { useState } from 'react';
-import { withStellarWallet } from '../.storybook/decorators/withStellarWallet';
-import { SAMPLE_STEALTH_ADDRESS } from '../.storybook/fixtures';
+import { withStellarWallet } from '../../.storybook/decorators/withStellarWallet';
+import { SAMPLE_STEALTH_ADDRESS } from '../../.storybook/fixtures';
 
 // Simulated status badge component for testing
 function StatusBadge({ status }: { status: 'valid' | 'invalid' | 'pending' | 'success' | 'failed' | 'unvalidated' }) {
