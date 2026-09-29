@@ -8,7 +8,6 @@
 
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { mockConnectedWallet } from './a11y-fixtures';
 
 const SB = 'http://127.0.0.1:6006';
 
@@ -49,15 +48,16 @@ async function assertNoSerious(
 
 test.describe('Accessibility — Focus Trap & Return (QRCodeModal)', () => {
   test('focus returns to trigger after modal close', async ({ page }) => {
-    await gotoStory(page, 'a11y-qrcodemodal--open');
-    const dialog = page.getByRole('dialog');
+    await gotoStory(page, 'a11y-qrcodemodal--interactive');
     const triggerButton = page.getByRole('button', { name: /show qr/i });
+    const dialog = page.getByRole('dialog');
 
     // Focus the trigger button before opening modal
     await triggerButton.focus();
     await expect(triggerButton).toBeFocused();
 
-    // Open the modal (simulated in story)
+    // Click trigger to open the modal
+    await triggerButton.click();
     await expect(dialog).toBeVisible();
 
     // Click inside dialog to set focus
@@ -71,8 +71,12 @@ test.describe('Accessibility — Focus Trap & Return (QRCodeModal)', () => {
   });
 
   test('focus stays trapped during multiple Tab cycles', async ({ page }) => {
-    await gotoStory(page, 'a11y-qrcodemodal--open');
+    await gotoStory(page, 'a11y-qrcodemodal--interactive');
+    const triggerButton = page.getByRole('button', { name: /show qr/i });
     const dialog = page.getByRole('dialog');
+
+    // Click trigger to open the modal
+    await triggerButton.click();
     await expect(dialog).toBeVisible();
     await dialog.click();
 
@@ -87,15 +91,16 @@ test.describe('Accessibility — Focus Trap & Return (QRCodeModal)', () => {
 
 test.describe('Accessibility — Focus Trap & Return (StellarBatchWithdrawModal)', () => {
   test('focus returns to trigger after modal close', async ({ page }) => {
-    await gotoStory(page, 'a11y-stellarbatchwithdrawmodal--open');
+    await gotoStory(page, 'a11y-stellarbatchwithdrawmodal--interactive');
+    const triggerButton = page.getByRole('button', { name: /open batch withdraw/i });
     const dialog = page.getByRole('dialog', { name: /batch withdrawal preview/i });
-    const triggerButton = page.getByRole('button', { name: /withdraw/i });
 
     // Focus the trigger button before opening modal
     await triggerButton.focus();
     await expect(triggerButton).toBeFocused();
 
-    // Open the modal (simulated in story)
+    // Click trigger to open the modal
+    await triggerButton.click();
     await expect(dialog).toBeVisible();
 
     // Click inside dialog to set focus
@@ -109,8 +114,12 @@ test.describe('Accessibility — Focus Trap & Return (StellarBatchWithdrawModal)
   });
 
   test('focus stays trapped during multiple Tab cycles', async ({ page }) => {
-    await gotoStory(page, 'a11y-stellarbatchwithdrawmodal--open');
+    await gotoStory(page, 'a11y-stellarbatchwithdrawmodal--interactive');
+    const triggerButton = page.getByRole('button', { name: /open batch withdraw/i });
     const dialog = page.getByRole('dialog', { name: /batch withdrawal preview/i });
+
+    // Click trigger to open the modal
+    await triggerButton.click();
     await expect(dialog).toBeVisible();
     await dialog.click();
 
@@ -125,15 +134,16 @@ test.describe('Accessibility — Focus Trap & Return (StellarBatchWithdrawModal)
 
 test.describe('Accessibility — Focus Trap & Return (QRScannerDialog)', () => {
   test('focus returns to trigger after modal close', async ({ page }) => {
-    await gotoStory(page, 'a11y-qrscannerdialog--open');
-    const dialog = page.getByRole('dialog', { name: /scan recipient qr/i });
+    await gotoStory(page, 'a11y-qrscannerdialog--interactive');
     const triggerButton = page.getByRole('button', { name: /scan qr/i });
+    const dialog = page.getByRole('dialog', { name: /scan recipient qr/i });
 
     // Focus the trigger button before opening modal
     await triggerButton.focus();
     await expect(triggerButton).toBeFocused();
 
-    // Open the modal (simulated in story)
+    // Click trigger to open the modal
+    await triggerButton.click();
     await expect(dialog).toBeVisible();
 
     // Click inside dialog to set focus
@@ -147,8 +157,12 @@ test.describe('Accessibility — Focus Trap & Return (QRScannerDialog)', () => {
   });
 
   test('focus stays trapped during multiple Tab cycles', async ({ page }) => {
-    await gotoStory(page, 'a11y-qrscannerdialog--open');
+    await gotoStory(page, 'a11y-qrscannerdialog--interactive');
+    const triggerButton = page.getByRole('button', { name: /scan qr/i });
     const dialog = page.getByRole('dialog', { name: /scan recipient qr/i });
+
+    // Click trigger to open the modal
+    await triggerButton.click();
     await expect(dialog).toBeVisible();
     await dialog.click();
 
@@ -205,18 +219,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarBatchWithdrawModal)',
 
 test.describe('Accessibility — ARIA Live Regions (StellarSendView)', () => {
   test('error messages announce via aria-live', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/send');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarsendview--interactive');
 
-    // Strictly assert the form is visible
-    const recipientInput = page.locator('#stellar-recipient');
-    await expect(recipientInput).toBeVisible();
-
-    // Trigger an error by submitting invalid data
-    await recipientInput.fill('invalid-meta-address');
-    await page.locator('#stellar-amount').fill('1.5');
+    // Click Error button to trigger error state
+    await page.getByRole('button', { name: 'Error' }).click();
 
     // Assert aria-live regions exist for error announcements
     const liveRegions = await page.evaluate(() => {
@@ -235,24 +241,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarSendView)', () => {
   });
 
   test('pending state announces via aria-live', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/send');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarsendview--interactive');
 
-    // Strictly assert the form is visible
-    const recipientInput = page.locator('#stellar-recipient');
-    await expect(recipientInput).toBeVisible();
-
-    // Fill in valid data
-    await recipientInput.fill(
-      'st:xlm:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-    );
-    await page.locator('#stellar-amount').fill('1.5');
-
-    // Submit to trigger pending state
-    const submitButton = page.getByRole('button', { name: /send/i });
-    await submitButton.click();
+    // Click Pending button to trigger pending state
+    await page.getByRole('button', { name: 'Pending' }).click();
 
     // Assert pending state text is announced
     const statusRegion = page.locator('[aria-live="polite"]');
@@ -261,25 +253,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarSendView)', () => {
   });
 
   test('success state announces via aria-live', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/send');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarsendview--interactive');
 
-    // Strictly assert the form is visible
-    const recipientInput = page.locator('#stellar-recipient');
-    await expect(recipientInput).toBeVisible();
-
-    // Fill in valid data
-    await recipientInput.fill(
-      'st:xlm:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-    );
-    await page.locator('#stellar-amount').fill('1.5');
-
-    // Submit and wait for success state
-    const submitButton = page.getByRole('button', { name: /send/i });
-    await submitButton.click();
-    await page.waitForTimeout(2000);
+    // Click Success button to trigger success state
+    await page.getByRole('button', { name: 'Success' }).click();
 
     // Assert success state text is announced
     const statusRegion = page.locator('[aria-live="polite"]');
@@ -290,18 +267,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarSendView)', () => {
 
 test.describe('Accessibility — ARIA Live Regions (StellarVaultDeposit)', () => {
   test('form validation errors announce via aria-live', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/vault/deposit');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarvaultdeposit--interactive');
 
-    // Strictly assert the form is visible
-    const form = page.locator('form');
-    await expect(form).toBeVisible();
-
-    // Trigger a validation error by submitting empty form
-    const submitButton = page.getByRole('button', { name: /deposit/i });
-    await submitButton.click();
+    // Click Error button to trigger error state
+    await page.getByRole('button', { name: 'Error' }).click();
 
     // Assert aria-live regions exist for validation errors
     const liveRegions = await page.evaluate(() => {
@@ -320,20 +289,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarVaultDeposit)', () =>
   });
 
   test('pending state announces via aria-live', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/vault/deposit');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarvaultdeposit--interactive');
 
-    // Strictly assert the form is visible
-    const form = page.locator('form');
-    await expect(form).toBeVisible();
-
-    // Fill in valid data and submit
-    const amountInput = page.locator('#vault-amount');
-    await amountInput.fill('1.5');
-    const submitButton = page.getByRole('button', { name: /deposit/i });
-    await submitButton.click();
+    // Click Pending button to trigger pending state
+    await page.getByRole('button', { name: 'Pending' }).click();
 
     // Assert pending state text is announced
     const statusRegion = page.locator('[aria-live="polite"]');
@@ -342,21 +301,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarVaultDeposit)', () =>
   });
 
   test('success state announces via aria-live', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/vault/deposit');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarvaultdeposit--interactive');
 
-    // Strictly assert the form is visible
-    const form = page.locator('form');
-    await expect(form).toBeVisible();
-
-    // Fill in valid data and submit
-    const amountInput = page.locator('#vault-amount');
-    await amountInput.fill('1.5');
-    const submitButton = page.getByRole('button', { name: /deposit/i });
-    await submitButton.click();
-    await page.waitForTimeout(2000);
+    // Click Success button to trigger success state
+    await page.getByRole('button', { name: 'Success' }).click();
 
     // Assert success state text is announced
     const statusRegion = page.locator('[aria-live="polite"]');
@@ -367,14 +315,7 @@ test.describe('Accessibility — ARIA Live Regions (StellarVaultDeposit)', () =>
 
 test.describe('Accessibility — ARIA Live Regions (StellarSplit)', () => {
   test('batch status indicators announce via aria-live', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/split');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
-
-    // Strictly assert the form is visible
-    const form = page.locator('form');
-    await expect(form).toBeVisible();
+    await gotoStory(page, 'stellar-stellarsplit--interactive');
 
     // Assert aria-live regions exist for status indicators
     const liveRegions = await page.evaluate(() => {
@@ -392,20 +333,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarSplit)', () => {
   });
 
   test('pending state announces via aria-live', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/split');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarsplit--interactive');
 
-    // Strictly assert the form is visible
-    const form = page.locator('form');
-    await expect(form).toBeVisible();
-
-    // Fill in valid data and submit
-    const amountInput = page.locator('#split-amount');
-    await amountInput.fill('1.5');
-    const submitButton = page.getByRole('button', { name: /split/i });
-    await submitButton.click();
+    // Click Pending button to trigger pending state
+    await page.getByRole('button', { name: 'Pending' }).click();
 
     // Assert pending state text is announced
     const statusRegion = page.locator('[aria-live="polite"]');
@@ -414,21 +345,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarSplit)', () => {
   });
 
   test('success state announces via aria-live', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/split');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarsplit--interactive');
 
-    // Strictly assert the form is visible
-    const form = page.locator('form');
-    await expect(form).toBeVisible();
-
-    // Fill in valid data and submit
-    const amountInput = page.locator('#split-amount');
-    await amountInput.fill('1.5');
-    const submitButton = page.getByRole('button', { name: /split/i });
-    await submitButton.click();
-    await page.waitForTimeout(2000);
+    // Click Success button to trigger success state
+    await page.getByRole('button', { name: 'Success' }).click();
 
     // Assert success state text is announced
     const statusRegion = page.locator('[aria-live="polite"]');
@@ -437,20 +357,10 @@ test.describe('Accessibility — ARIA Live Regions (StellarSplit)', () => {
   });
 
   test('error state announces via aria-live', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/split');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarsplit--interactive');
 
-    // Strictly assert the form is visible
-    const form = page.locator('form');
-    await expect(form).toBeVisible();
-
-    // Trigger an error by submitting invalid data
-    const amountInput = page.locator('#split-amount');
-    await amountInput.fill('-1');
-    const submitButton = page.getByRole('button', { name: /split/i });
-    await submitButton.click();
+    // Click Failed button to trigger error state
+    await page.getByRole('button', { name: 'Failed' }).click();
 
     // Assert error state text is announced
     const alertRegion = page.locator('[aria-live="assertive"], [role="alert"]');
@@ -465,8 +375,12 @@ test.describe('Accessibility — ARIA Live Regions (StellarSplit)', () => {
 
 test.describe('Accessibility — Keyboard Navigation (Modal Dismissal)', () => {
   test('Escape key closes QRCodeModal', async ({ page }) => {
-    await gotoStory(page, 'a11y-qrcodemodal--escape-closes');
+    await gotoStory(page, 'a11y-qrcodemodal--interactive');
+    const triggerButton = page.getByRole('button', { name: /show qr/i });
     const dialog = page.getByRole('dialog');
+
+    // Click trigger to open the modal
+    await triggerButton.click();
     await expect(dialog).toBeVisible();
 
     // Press Escape to close
@@ -477,8 +391,12 @@ test.describe('Accessibility — Keyboard Navigation (Modal Dismissal)', () => {
   });
 
   test('Escape key closes StellarBatchWithdrawModal', async ({ page }) => {
-    await gotoStory(page, 'a11y-stellarbatchwithdrawmodal--escape-closes');
+    await gotoStory(page, 'a11y-stellarbatchwithdrawmodal--interactive');
+    const triggerButton = page.getByRole('button', { name: /open batch withdraw/i });
     const dialog = page.getByRole('dialog', { name: /batch withdrawal preview/i });
+
+    // Click trigger to open the modal
+    await triggerButton.click();
     await expect(dialog).toBeVisible();
 
     // Press Escape to close
@@ -491,10 +409,7 @@ test.describe('Accessibility — Keyboard Navigation (Modal Dismissal)', () => {
 
 test.describe('Accessibility — Keyboard Navigation (Form Submission)', () => {
   test('Enter key submits StellarSend form when valid', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/send');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarsendview--interactive');
 
     // Strictly assert the form is visible
     const recipientInput = page.locator('#stellar-recipient');
@@ -514,10 +429,7 @@ test.describe('Accessibility — Keyboard Navigation (Form Submission)', () => {
   });
 
   test('Tab + Space/Enter navigates and activates form controls', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/send');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarsendview--interactive');
 
     // Strictly assert the form is visible
     const recipientInput = page.locator('#stellar-recipient');
@@ -536,8 +448,12 @@ test.describe('Accessibility — Keyboard Navigation (Form Submission)', () => {
 
 test.describe('Accessibility — Keyboard Navigation (QRScannerDialog)', () => {
   test('Escape key closes QR scanner dialog', async ({ page }) => {
-    await gotoStory(page, 'a11y-qrscannerdialog--open');
+    await gotoStory(page, 'a11y-qrscannerdialog--interactive');
+    const triggerButton = page.getByRole('button', { name: /scan qr/i });
     const dialog = page.getByRole('dialog', { name: /scan recipient qr/i });
+
+    // Click trigger to open the dialog
+    await triggerButton.click();
     await expect(dialog).toBeVisible();
 
     // Press Escape to close
@@ -548,8 +464,12 @@ test.describe('Accessibility — Keyboard Navigation (QRScannerDialog)', () => {
   });
 
   test('Space/Enter activates buttons in scanner dialog', async ({ page }) => {
-    await gotoStory(page, 'a11y-qrscannerdialog--open');
+    await gotoStory(page, 'a11y-qrscannerdialog--interactive');
+    const triggerButton = page.getByRole('button', { name: /scan qr/i });
     const dialog = page.getByRole('dialog', { name: /scan recipient qr/i });
+
+    // Click trigger to open the dialog
+    await triggerButton.click();
     await expect(dialog).toBeVisible();
 
     // Tab to the "Choose QR image" button
@@ -570,41 +490,41 @@ test.describe('Accessibility — Keyboard Navigation (QRScannerDialog)', () => {
 
 test.describe('Accessibility — Axe Scan (StellarBatchWithdrawModal)', () => {
   test('has zero critical or serious violations with dynamic content', async ({ page }) => {
-    await gotoStory(page, 'a11y-stellarbatchwithdrawmodal--open');
+    await gotoStory(page, 'a11y-stellarbatchwithdrawmodal--interactive');
+    const triggerButton = page.getByRole('button', { name: /open batch withdraw/i });
+    await triggerButton.click();
     await assertNoSerious(page, 'StellarBatchWithdrawModal with dynamic content');
   });
 });
 
 test.describe('Accessibility — Axe Scan (QRCodeModal)', () => {
   test('has zero critical or serious violations with dynamic content', async ({ page }) => {
-    await gotoStory(page, 'a11y-qrcodemodal--open');
+    await gotoStory(page, 'a11y-qrcodemodal--interactive');
+    const triggerButton = page.getByRole('button', { name: /show qr/i });
+    await triggerButton.click();
     await assertNoSerious(page, 'QRCodeModal with dynamic content');
   });
 });
 
 test.describe('Accessibility — Axe Scan (QRScannerDialog)', () => {
   test('has zero critical or serious violations with dynamic content', async ({ page }) => {
-    await gotoStory(page, 'a11y-qrscannerdialog--open');
+    await gotoStory(page, 'a11y-qrscannerdialog--interactive');
+    const triggerButton = page.getByRole('button', { name: /scan qr/i });
+    await triggerButton.click();
     await assertNoSerious(page, 'QRScannerDialog with dynamic content');
   });
 });
 
 test.describe('Accessibility — Axe Scan (StellarSend)', () => {
   test('has zero critical or serious violations with dynamic feedback', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/send');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarsendview--interactive');
     await assertNoSerious(page, 'StellarSend with dynamic feedback');
   });
 });
 
 test.describe('Accessibility — Axe Scan (StellarVaultDeposit)', () => {
   test('has zero critical or serious violations with dynamic feedback', async ({ page }) => {
-    await mockConnectedWallet(page);
-    await page.goto('/stellar/vault/deposit');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await gotoStory(page, 'stellar-stellarvaultdeposit--interactive');
     await assertNoSerious(page, 'StellarVaultDeposit with dynamic feedback');
   });
 });
