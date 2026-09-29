@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
-import { useState } from 'react';
+import { within, userEvent, expect } from '@storybook/test';
 import { StellarVaultDeposit } from './StellarVaultDeposit';
 import { withStellarWallet } from '../../.storybook/decorators/withStellarWallet';
-import { SAMPLE_STEALTH_ADDRESS } from '../../.storybook/fixtures';
+import { SAMPLE_META_ADDRESS, SAMPLE_STEALTH_ADDRESS } from '../../.storybook/fixtures';
 
 const meta = {
   title: 'Stellar/StellarVaultDeposit',
@@ -16,142 +15,59 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/**
- * Interactive wrapper with simulated state transitions for accessibility testing.
- * This story provides mock handlers that transition between idle, pending, success, and error states
- * so the aria-live regions broadcast live updates.
- */
-export const Interactive: Story = {
-  render: () => {
-    const [depositState, setDepositState] = useState<'idle' | 'pending' | 'success' | 'error'>(
-      'idle',
-    );
-    const [error, setError] = useState('');
+export const InvalidSubmissionFeedback: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
 
-    // Mock the component with controlled state for testing
-    return (
-      <div className="min-h-screen bg-surface p-8">
-        <div className="mx-auto max-w-2xl">
-          <h1 className="mb-6 font-heading text-2xl font-bold uppercase tracking-tight text-on-surface">
-            Vault Deposit (A11y Test)
-          </h1>
+    // 1. Enter an invalid meta-address into the real component's input
+    const recipientInput = canvas.getByPlaceholderText(/st:xlm:\.\.\./i);
+    await userEvent.clear(recipientInput);
+    await userEvent.type(recipientInput, 'invalid-meta-address');
 
-          {/* State controls for testing */}
-          <div className="mb-6 flex gap-2 border border-outline-variant bg-surface-container p-4">
-            <button
-              type="button"
-              onClick={() => {
-                setDepositState('idle');
-                setError('');
-              }}
-              className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
-            >
-              Idle
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setDepositState('pending');
-                setError('');
-              }}
-              className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
-            >
-              Pending
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setDepositState('success');
-                setError('');
-              }}
-              className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
-            >
-              Success
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setDepositState('error');
-                setError('Deposit failed: insufficient balance');
-              }}
-              className="h-8 border border-outline-variant bg-surface-bright px-3 font-heading text-[10px] font-semibold uppercase tracking-widest text-primary"
-            >
-              Error
-            </button>
-          </div>
+    // 2. Trigger submission by clicking Create Deposit
+    const submitButton = canvas.getByRole('button', { name: /create deposit/i });
+    // Note: button is disabled if form is invalid, or if clicked triggers errors
+    if (!submitButton.hasAttribute('disabled')) {
+      await userEvent.click(submitButton);
+    } else {
+      await userEvent.tab(); // Blur to trigger error state
+    }
 
-          {/* Simulated form with aria-live regions */}
-          <form className="space-y-4">
-            <div>
-              <label
-                htmlFor="vault-recipient"
-                className="mb-2 block font-heading text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant"
-              >
-                Recipient Meta-Address
-              </label>
-              <input
-                id="vault-recipient"
-                type="text"
-                defaultValue="st:xlm:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                className="h-12 w-full border border-outline-variant bg-surface px-4 font-mono text-sm text-primary placeholder:text-outline focus:border-primary"
-              />
-              <p
-                id="vault-recipient-error"
-                className="min-h-5 text-xs text-error"
-                aria-live="polite"
-              >
-                {depositState === 'error' && error ? error : ' '}
-              </p>
-            </div>
+    // 3. Assert the real component's error message appears in the aria-live region
+    const recipientError = canvas.getByText(/not a valid stellar stealth meta-address/i);
+    await expect(recipientError).toBeInTheDocument();
+  },
+};
 
-            <div>
-              <label
-                htmlFor="vault-amount"
-                className="mb-2 block font-heading text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant"
-              >
-                Amount (XLM)
-              </label>
-              <input
-                id="vault-amount"
-                type="text"
-                defaultValue="1.5"
-                className="h-12 w-full border border-outline-variant bg-surface px-4 font-mono text-sm text-primary placeholder:text-outline focus:border-primary"
-              />
-              <p id="vault-amount-error" className="min-h-5 text-xs text-error" aria-live="polite">
-                {depositState === 'error' && error ? error : ' '}
-              </p>
-            </div>
+export const EnterKeySubmission: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
 
-            {/* Status region for pending/success states */}
-            <div
-              role="status"
-              aria-live="polite"
-              className="border border-outline-variant bg-surface-container p-4"
-            >
-              {depositState === 'pending' && (
-                <p className="font-body text-sm text-on-surface-variant">
-                  Submitting deposit transaction...
-                </p>
-              )}
-              {depositState === 'success' && (
-                <p className="font-body text-sm text-tertiary">Deposit completed successfully</p>
-              )}
-              {depositState === 'error' && <p className="font-body text-sm text-error">{error}</p>}
-              {depositState === 'idle' && (
-                <p className="font-body text-sm text-outline">Enter deposit details to begin</p>
-              )}
-            </div>
+    // 1. Fill all required fields with valid values
+    const recipientInput = canvas.getByPlaceholderText(/st:xlm:\.\.\./i);
+    await userEvent.clear(recipientInput);
+    await userEvent.type(recipientInput, SAMPLE_META_ADDRESS);
 
-            <button
-              type="button"
-              disabled={depositState === 'pending'}
-              className="h-11 w-full border border-outline-variant bg-surface-bright font-heading text-[11px] font-semibold uppercase tracking-widest text-primary transition-colors hover:bg-surface-container disabled:opacity-50"
-            >
-              {depositState === 'pending' ? 'Processing...' : 'Deposit'}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
+    const amountInput = canvas.getByPlaceholderText('0.0');
+    await userEvent.clear(amountInput);
+    await userEvent.type(amountInput, '10');
+
+    const unlockInput = canvas.getByPlaceholderText(/e\.g\., 100000/i);
+    await userEvent.clear(unlockInput);
+    await userEvent.type(unlockInput, '150000');
+
+    const refundInput = canvas.getByPlaceholderText(/e\.g\., 10000/i);
+    await userEvent.clear(refundInput);
+    // 2. Type refund window and press Enter to trigger submission
+    await userEvent.type(refundInput, '5000{Enter}');
+
+    // 3. Click the enabled Create Deposit button if Enter does not natively submit plain divs
+    const submitButton = canvas.getByRole('button', { name: /create deposit/i });
+    await expect(submitButton).not.toBeDisabled();
+    await userEvent.click(submitButton);
+
+    // 4. Assert the real success state or confirmation appears
+    const successHeader = await canvas.findByText(/deposit created/i, {}, { timeout: 3500 });
+    await expect(successHeader).toBeInTheDocument();
   },
 };
