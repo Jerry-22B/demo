@@ -83,7 +83,11 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {
+    status: 'unvalidated', // or 'valid' / whichever is the initial default
+  },
+};
 
 /**
  * Interactive wrapper with simulated state transitions for accessibility testing.
@@ -91,6 +95,9 @@ export const Default: Story = {};
  * so the aria-live regions broadcast live updates.
  */
 export const Interactive: Story = {
+  args: {
+    status: 'unvalidated',
+  },
   render: () => {
     const [status, setStatus] = useState<
       'valid' | 'invalid' | 'pending' | 'success' | 'failed' | 'unvalidated'
