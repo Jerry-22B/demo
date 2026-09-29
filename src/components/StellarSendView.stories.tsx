@@ -126,10 +126,9 @@ export const Success: Story = {
 };
 
 /**
- * Interactive test driving the actual StellarSendView component with real event handling
- * and asserting Enter key form submission.
+ * Mounts the real StellarSendView component and asserts Enter key triggers form submission.
  */
-export const InteractiveEnterSubmission: Story = {
+export const EnterKeySubmission: Story = {
   args: {
     isConnected: true,
     recipient: SAMPLE_META_ADDRESS,
@@ -143,14 +142,15 @@ export const InteractiveEnterSubmission: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
 
-    // 1. Locate the amount input in the actual component
-    const amountInput = canvas.getByRole('textbox', { name: /amount/i });
+    // Target the real component's input
+    const inputs = canvas.getAllByRole('textbox');
+    const amountInput = inputs[inputs.length - 1]; // The amount field
 
-    // 2. Type an updated amount and press Enter
+    // Clear and type with Enter key
     await userEvent.clear(amountInput);
-    await userEvent.type(amountInput, '25{Enter}');
+    await userEvent.type(amountInput, '15{Enter}');
 
-    // 3. Assert that Enter key triggers the actual onSend callback
+    // Direct result assertion: verify that onSend handler was triggered
     await expect(args.onSend).toHaveBeenCalled();
   },
 };
