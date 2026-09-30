@@ -82,3 +82,4 @@ export const EnterKeySubmission: Story = {
     await expect(sendButton).toBeInTheDocument();
   },
 };
+export const Interactive = EnterKeySubmission;

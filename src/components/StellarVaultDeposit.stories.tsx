@@ -65,3 +65,4 @@ export const EnterKeySubmission: Story = {
     await expect(successBanner).toBeInTheDocument();
   },
 };
+export const Interactive = EnterKeySubmission;

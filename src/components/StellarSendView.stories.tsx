@@ -154,3 +154,4 @@ export const EnterKeySubmission: Story = {
     await expect(args.onSend).toHaveBeenCalled();
   },
 };
+export const Interactive = EnterKeySubmission;
