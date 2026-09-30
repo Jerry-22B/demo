@@ -6,6 +6,11 @@ import { SAMPLE_STEALTH_ADDRESS } from '../../.storybook/fixtures';
 
 const meta = {
   title: 'Pages/StellarSplit',
+  parameters: {
+    msw: {
+      disabled: true,
+    },
+  },
   component: StellarSplit,
   decorators: [withStellarWallet({ address: SAMPLE_STEALTH_ADDRESS })],
 } satisfies Meta<typeof StellarSplit>;

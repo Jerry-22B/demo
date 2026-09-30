@@ -6,6 +6,11 @@ import { SAMPLE_META_ADDRESS, SAMPLE_STEALTH_ADDRESS } from '../../.storybook/fi
 
 const meta = {
   title: 'Stellar/StellarVaultDeposit',
+  parameters: {
+    msw: {
+      disabled: true,
+    },
+  },
   component: StellarVaultDeposit,
   decorators: [withStellarWallet({ address: SAMPLE_STEALTH_ADDRESS })],
 } satisfies Meta<typeof StellarVaultDeposit>;

@@ -10,6 +10,11 @@ import {
 const meta = {
   title: 'Stellar/StellarSendView',
   component: StellarSendView,
+  parameters: {
+    msw: {
+      disabled: true,
+    },
+  },
   args: {
     isConnected: true,
     recipient: '',
