@@ -43,11 +43,7 @@ jobs:
       - name: Ensure Chromium is installed
         run: pnpm exec playwright install chromium
 
-      - name: Build Storybook
-        run: pnpm build-storybook --quiet
-
       - name: Run accessibility tests
-        run: |
-          pnpm exec concurrently -k -s first -n SB,TEST \
-            "pnpm exec http-server storybook-static --port 6006 --silent" \
-            "pnpm exec wait-on tcp:127.0.0.1:6006 && pnpm test:a11y"
+        env:
+          HOME: /root
+        run: pnpm test:a11y
