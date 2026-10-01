@@ -2,9 +2,9 @@ export default {};
 
 declare global {
   interface Window {
-    ViteWS?: typeof WebSocket;
+    ViteWS?: unknown;
   }
 }
 
 export const WebSocket =
-  typeof window !== 'undefined' ? window.ViteWS || window.WebSocket : undefined;
+  typeof window !== 'undefined' ? (window.ViteWS as any) || globalThis.WebSocket : undefined;
